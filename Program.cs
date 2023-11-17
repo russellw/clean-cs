@@ -92,7 +92,7 @@ void Do(string file) {
 	}
 
 	if (inplace) {
-		if (v == old)
+		if (v.SequenceEqual(old))
 			return;
 		WriteLines(file, v);
 		Console.WriteLine(file);
