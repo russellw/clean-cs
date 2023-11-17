@@ -1,5 +1,6 @@
 var options = true;
 var inplace = false;
+var recursive = false;
 var files = new List<string>();
 foreach (var arg in args) {
 	var s = arg;
@@ -8,21 +9,25 @@ foreach (var arg in args) {
 			options = false;
 			continue;
 		}
-		if (s.StartsWith("-")) {
-			if (s.StartsWith("--"))
+		if (s.StartsWith('-')) {
+			while (s.StartsWith('-'))
 				s = s[1..];
 			switch (s) {
-			case "-i":
+			case "i":
 				inplace = true;
 				break;
-			case "-?":
-			case "-h":
-			case "-help":
+			case "r":
+			case "recursive":
+				recursive = true;
+				break;
+			case "?":
+			case "h":
+			case "help":
 				Help();
 				return 0;
-			case "-V":
-			case "-v":
-			case "-version":
+			case "V":
+			case "v":
+			case "version":
 				Console.WriteLine("clean-cs 1.0");
 				return 0;
 			default:
@@ -39,7 +44,35 @@ if (files.Count == 0) {
 	return 0;
 }
 
-foreach (var file in files) {
+foreach (var path in files)
+	if (Directory.Exists(path)) {
+		if (!recursive) {
+			Console.WriteLine(path + " is a directory, use -r to recur on all .cs files therein");
+			return 1;
+		}
+		Recur(path);
+	} else
+		Do(path);
+return 0;
+
+static void Help() {
+	Console.WriteLine("Usage: clean-cs [options] path...");
+	Console.WriteLine("");
+	Console.WriteLine("-h  Show help");
+	Console.WriteLine("-V  Show version");
+	Console.WriteLine("-i  In-place edit");
+	Console.WriteLine("-r  Recur into directories");
+}
+
+void Recur(string path) {
+	foreach (var entry in new DirectoryInfo(path).EnumerateFileSystemInfos())
+		if (entry is DirectoryInfo)
+			Recur(entry.FullName);
+		else if (entry.Extension == ".cs")
+			Do(entry.FullName);
+}
+
+void Do(string file) {
 	var v = new List<string>(File.ReadLines(file));
 	var old = new List<string>(v);
 
@@ -60,22 +93,13 @@ foreach (var file in files) {
 
 	if (inplace) {
 		if (v == old)
-			continue;
+			return;
 		WriteLines(file, v);
 		Console.WriteLine(file);
-		continue;
+		return;
 	}
 	foreach (var s in v)
 		Console.WriteLine(s);
-}
-return 0;
-
-static void Help() {
-	Console.WriteLine("Usage: clean-cs [options] file...");
-	Console.WriteLine("");
-	Console.WriteLine("-h  Show help");
-	Console.WriteLine("-V  Show version");
-	Console.WriteLine("-i  In-place edit");
 }
 
 static void WriteLines(string file, IEnumerable<string> v) {
