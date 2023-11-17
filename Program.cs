@@ -43,7 +43,7 @@ foreach (var file in files) {
 	var v = new List<string>(File.ReadLines(file));
 	var old = new List<string>(v);
 
-	// capitalize comments
+	// Capitalize comments
 	for (int i = 1; i < v.Count; i++) {
 		var s = v[i].TrimStart();
 		if (s.StartsWith("// ") && !v[i - 1].TrimStart().StartsWith("//")) {
