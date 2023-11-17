@@ -54,7 +54,7 @@ foreach (var file in files) {
 				continue;
 			if (s.StartsWith("http"))
 				continue;
-			v[i] = char.ToUpperInvariant(s[0]) + s[1..];
+			v[i] = v[i][..(v[i].Length - s.Length)] + char.ToUpperInvariant(s[0]) + s[1..];
 		}
 	}
 
