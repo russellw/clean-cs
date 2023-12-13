@@ -76,11 +76,15 @@ static class Program {
 	}
 
 	static void Descend(string path) {
-		foreach (var entry in new DirectoryInfo(path).EnumerateFileSystemInfos())
-			if (entry is DirectoryInfo)
-				Descend(entry.FullName);
-			else if (entry.Extension == ".cs")
+		foreach (var entry in new DirectoryInfo(path).EnumerateFileSystemInfos()) {
+			if (entry is DirectoryInfo) {
+				if (!entry.Name.StartsWith('.'))
+					Descend(entry.FullName);
+				continue;
+			}
+			if (entry.Extension == ".cs")
 				Do(entry.FullName);
+		}
 	}
 
 	static void Do(string file) {
