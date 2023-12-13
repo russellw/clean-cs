@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 static class Program {
 	static bool inplace;
 
@@ -122,5 +124,13 @@ static class Program {
 		writer.NewLine = "\n";
 		foreach (var s in v)
 			writer.WriteLine(s);
+	}
+
+	static void Print<T>(List<T> a, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
+		Console.WriteLine("{0}:{1}: [{2}]", file, line, string.Join(", ", a));
+	}
+
+	static void Print(object a, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
+		Console.WriteLine($"{file}:{line}: {a}");
 	}
 }
