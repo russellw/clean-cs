@@ -94,9 +94,9 @@ static class Program {
 		var old = new List<string>(v);
 
 		// Capitalize comments
-		for (int i = 1; i < v.Count; i++) {
+		for (int i = 0; i < v.Count; i++) {
 			var s = v[i].TrimStart();
-			if (s.StartsWith("// ") && !v[i - 1].TrimStart().StartsWith("//")) {
+			if (s.StartsWith("// ") && (i == 0 || !v[i - 1].TrimStart().StartsWith("//"))) {
 				s = s[3..];
 				if (s == "")
 					continue;
