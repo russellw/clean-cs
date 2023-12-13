@@ -4,7 +4,7 @@ static class Program {
 	static void Main(string[] args) {
 		var options = true;
 		var recursive = false;
-		var files = new List<string>();
+		var paths = new List<string>();
 		foreach (var arg in args) {
 			var s = arg;
 			if (options) {
@@ -31,7 +31,7 @@ static class Program {
 					case "V":
 					case "v":
 					case "version":
-						Console.WriteLine("clean-cs 1.0");
+						Version();
 						return;
 					default:
 						Console.WriteLine("{0}: unknown option", arg);
@@ -41,14 +41,14 @@ static class Program {
 					continue;
 				}
 			}
-			files.Add(s);
+			paths.Add(s);
 		}
-		if (files.Count == 0) {
+		if (paths.Count == 0) {
 			Help();
 			return;
 		}
 
-		foreach (var path in files)
+		foreach (var path in paths)
 			if (Directory.Exists(path)) {
 				if (!recursive) {
 					Console.WriteLine(path + " is a directory, use -r to recur on all .cs files therein");
@@ -60,12 +60,19 @@ static class Program {
 	}
 
 	static void Help() {
-		Console.WriteLine("Usage: clean-cs [options] path...");
+		var name = typeof(Program).Assembly.GetName().Name;
+		Console.WriteLine($"Usage: {name} [options] path...");
 		Console.WriteLine("");
 		Console.WriteLine("-h  Show help");
 		Console.WriteLine("-V  Show version");
 		Console.WriteLine("-i  In-place edit");
 		Console.WriteLine("-r  Recur into directories");
+	}
+
+	static void Version() {
+		var name = typeof(Program).Assembly.GetName().Name;
+		var version = typeof(Program).Assembly.GetName()?.Version?.ToString(2);
+		Console.WriteLine($"{name} {version}");
 	}
 
 	static void Descend(string path) {
