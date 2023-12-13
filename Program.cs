@@ -50,7 +50,7 @@ foreach (var path in files)
 			Console.WriteLine(path + " is a directory, use -r to recur on all .cs files therein");
 			return 1;
 		}
-		Recur(path);
+		Descend(path);
 	} else
 		Do(path);
 return 0;
@@ -64,10 +64,10 @@ static void Help() {
 	Console.WriteLine("-r  Recur into directories");
 }
 
-void Recur(string path) {
+void Descend(string path) {
 	foreach (var entry in new DirectoryInfo(path).EnumerateFileSystemInfos())
 		if (entry is DirectoryInfo)
-			Recur(entry.FullName);
+			Descend(entry.FullName);
 		else if (entry.Extension == ".cs")
 			Do(entry.FullName);
 }
