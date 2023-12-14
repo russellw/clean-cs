@@ -102,11 +102,11 @@ static class Program {
 				Console.Error.WriteLine(diagnostic);
 			return;
 		}
-		var root = tree.GetCompilationUnitRoot();
+		SyntaxNode root = tree.GetCompilationUnitRoot();
 
-		root = CapitalizeComments(root);
+		root = new CapitalizeComments().Visit(root);
 
-		tree = CSharpSyntaxTree.Create(root);
+		tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
 		text = tree.ToString();
 		if (inplace) {
 			if (old == text)
@@ -116,32 +116,6 @@ static class Program {
 			return;
 		}
 		Console.Write(text);
-	}
-
-	static CompilationUnitSyntax CapitalizeComments(CompilationUnitSyntax root) {
-		var changes = new List<(SyntaxTrivia, SyntaxTrivia)>();
-		foreach (var a in root.DescendantTrivia().OfType<SyntaxTrivia>()) {
-			if (!a.IsKind(SyntaxKind.SingleLineCommentTrivia))
-				continue;
-			var s = a.ToString();
-			Debug.Assert(s.StartsWith("//"));
-			if (!(s.StartsWith("// ")))
-				continue;
-			s = s[3..];
-			if (s == "")
-				continue;
-			if (char.IsUpper(s, 0))
-				continue;
-			if (s.StartsWith("http"))
-				continue;
-			s = "// " + char.ToUpperInvariant(s[0]) + s[1..];
-			var b = a;
-			changes.Add((a, b));
-		}
-		foreach (var (a, b) in changes) {
-			root = root.ReplaceTrivia(a, b);
-		}
-		return root;
 	}
 
 	static void WriteText(string file, string text) {
