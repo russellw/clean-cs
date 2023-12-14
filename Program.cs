@@ -104,7 +104,7 @@ static class Program {
 		}
 		SyntaxNode root = tree.GetCompilationUnitRoot();
 
-		root = new CapitalizeComments().Visit(root);
+		root = new CapitalizeComments(root).Visit(root);
 
 		tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
 		text = tree.ToString();
