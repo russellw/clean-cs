@@ -1,7 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 static class Program {
@@ -105,6 +103,7 @@ static class Program {
 		SyntaxNode root = tree.GetCompilationUnitRoot();
 
 		root = new CapitalizeComments(root).Visit(root);
+		root = new SortCaseLabels().Visit(root);
 
 		tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
 		text = tree.ToString();
