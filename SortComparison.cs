@@ -12,6 +12,12 @@ sealed class SortComparison: CSharpSyntaxRewriter {
 			if (string.CompareOrdinal(a.ToString(), b.ToString()) > 0)
 				node = node.WithLeft(b).WithRight(a);
 			break;
+		case SyntaxKind.GreaterThanExpression:
+			node = SyntaxFactory.BinaryExpression(SyntaxKind.LessThanExpression, b, a);
+			break;
+		case SyntaxKind.GreaterThanOrEqualExpression:
+			node = SyntaxFactory.BinaryExpression(SyntaxKind.LessThanOrEqualExpression, b, a);
+			break;
 		}
 		return base.VisitBinaryExpression(node);
 	}
