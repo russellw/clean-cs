@@ -7,8 +7,8 @@ sealed class SortCaseSections: CSharpSyntaxRewriter {
 		var v = new List<SwitchSectionSyntax>(node.Sections);
 		var old = new List<SwitchSectionSyntax>(v);
 		v.Sort((a, b) => string.CompareOrdinal(a.ToString(), b.ToString()));
-		if (v.SequenceEqual(old))
-			return base.VisitSwitchStatement(node);
-		return node.WithSections(new SyntaxList<SwitchSectionSyntax>(v));
+		if (!v.SequenceEqual(old))
+			node = node.WithSections(new SyntaxList<SwitchSectionSyntax>(v));
+		return base.VisitSwitchStatement(node);
 	}
 }

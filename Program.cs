@@ -104,6 +104,7 @@ static class Program {
 		root = new CapitalizeComments(root).Visit(root);
 		root = new SortCaseLabels().Visit(root);
 		root = new SortCaseSections().Visit(root);
+		root = new SortComparison().Visit(root);
 
 		tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
 		text = tree.ToString();

@@ -1,0 +1,18 @@
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+sealed class SortComparison: CSharpSyntaxRewriter {
+	public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node) {
+		var a = node.Left;
+		var b = node.Right;
+		switch (node.Kind()) {
+		case SyntaxKind.EqualsExpression:
+		case SyntaxKind.NotEqualsExpression:
+			if (string.CompareOrdinal(a.ToString(), b.ToString()) > 0)
+				node = node.WithLeft(b).WithRight(a);
+			break;
+		}
+		return base.VisitBinaryExpression(node);
+	}
+}
