@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp;
 using System.Runtime.CompilerServices;
 
 static class Program {
@@ -36,7 +37,7 @@ static class Program {
 						Version();
 						return;
 					default:
-						Console.WriteLine("{0}: unknown option", arg);
+						Console.Error.WriteLine("{0}: unknown option", arg);
 						Environment.Exit(1);
 						break;
 					}
@@ -53,7 +54,7 @@ static class Program {
 		foreach (var path in paths)
 			if (Directory.Exists(path)) {
 				if (!recursive) {
-					Console.WriteLine(path + " is a directory, use -r to recur on all .cs files therein");
+					Console.Error.WriteLine(path + " is a directory, use -r to recur on all .cs files therein");
 					Environment.Exit(1);
 				}
 				Descend(path);
@@ -90,10 +91,20 @@ static class Program {
 	}
 
 	static void Do(string file) {
-		var v = new List<string>(File.ReadLines(file));
-		var old = new List<string>(v);
+		var text = File.ReadAllText(file);
+		var old = text;
+		var tree = CSharpSyntaxTree.ParseText(text, CSharpParseOptions.Default, file);
+
+		if (tree.GetDiagnostics().Any()) {
+			foreach (var diagnostic in tree.GetDiagnostics())
+				Console.Error.WriteLine(diagnostic);
+			return;
+		}
+
+		text = tree.ToString();
 
 		// Capitalize comments
+		/*
 		for (int i = 0; i < v.Count; i++) {
 			var s = v[i].TrimStart();
 			if (s.StartsWith("// ") && (i == 0 || !v[i - 1].TrimStart().StartsWith("//"))) {
@@ -107,30 +118,29 @@ static class Program {
 				v[i] = v[i][..(v[i].Length - s.Length)] + char.ToUpperInvariant(s[0]) + s[1..];
 			}
 		}
+		*/
 
 		if (inplace) {
-			if (v.SequenceEqual(old))
+			if (old == text)
 				return;
-			WriteLines(file, v);
-			Console.WriteLine(file);
+			WriteText(file, text);
+			Console.Error.WriteLine(file);
 			return;
 		}
-		foreach (var s in v)
-			Console.WriteLine(s);
+		Console.Write(text);
 	}
 
-	static void WriteLines(string file, IEnumerable<string> v) {
+	static void WriteText(string file, string text) {
 		using var writer = new StreamWriter(file);
 		writer.NewLine = "\n";
-		foreach (var s in v)
-			writer.WriteLine(s);
+		writer.Write(text);
 	}
 
 	static void Print<T>(List<T> a, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
-		Console.WriteLine("{0}:{1}: [{2}]", file, line, string.Join(", ", a));
+		Console.Error.WriteLine("{0}:{1}: [{2}]", file, line, string.Join(", ", a));
 	}
 
 	static void Print(object a, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
-		Console.WriteLine($"{file}:{line}: {a}");
+		Console.Error.WriteLine($"{file}:{line}: {a}");
 	}
 }
