@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Runtime.CompilerServices;
 
 static class Program {
 	static bool inplace;
@@ -121,13 +120,5 @@ static class Program {
 		using var writer = new StreamWriter(file);
 		writer.NewLine = "\n";
 		writer.Write(text);
-	}
-
-	static void Print<T>(List<T> a, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
-		Console.Error.WriteLine("{0}:{1}: [{2}]", file, line, string.Join(", ", a));
-	}
-
-	static void Print(object a, [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) {
-		Console.Error.WriteLine($"{file}:{line}: {a}");
 	}
 }
