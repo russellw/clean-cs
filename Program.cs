@@ -105,6 +105,7 @@ static class Program {
 		root = new SortCaseLabels().Visit(root);
 		root = new SortCaseSections().Visit(root);
 		root = new SortComparison().Visit(root);
+		root = new SortMembers().Visit(root);
 
 		tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
 		text = tree.ToString();
