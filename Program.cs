@@ -1,4 +1,7 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 static class Program {
@@ -94,32 +97,17 @@ static class Program {
 		var text = File.ReadAllText(file);
 		var old = text;
 		var tree = CSharpSyntaxTree.ParseText(text, CSharpParseOptions.Default, file);
-
 		if (tree.GetDiagnostics().Any()) {
 			foreach (var diagnostic in tree.GetDiagnostics())
 				Console.Error.WriteLine(diagnostic);
 			return;
 		}
+		var root = tree.GetCompilationUnitRoot();
 
+		root = CapitalizeComments(root);
+
+		tree = CSharpSyntaxTree.Create(root);
 		text = tree.ToString();
-
-		// Capitalize comments
-		/*
-		for (int i = 0; i < v.Count; i++) {
-			var s = v[i].TrimStart();
-			if (s.StartsWith("// ") && (i == 0 || !v[i - 1].TrimStart().StartsWith("//"))) {
-				s = s[3..];
-				if (s == "")
-					continue;
-				if (char.IsUpper(s, 0))
-					continue;
-				if (s.StartsWith("http"))
-					continue;
-				v[i] = v[i][..(v[i].Length - s.Length)] + char.ToUpperInvariant(s[0]) + s[1..];
-			}
-		}
-		*/
-
 		if (inplace) {
 			if (old == text)
 				return;
@@ -128,6 +116,32 @@ static class Program {
 			return;
 		}
 		Console.Write(text);
+	}
+
+	static CompilationUnitSyntax CapitalizeComments(CompilationUnitSyntax root) {
+		var changes = new List<(SyntaxTrivia, SyntaxTrivia)>();
+		foreach (var a in root.DescendantTrivia().OfType<SyntaxTrivia>()) {
+			if (!a.IsKind(SyntaxKind.SingleLineCommentTrivia))
+				continue;
+			var s = a.ToString();
+			Debug.Assert(s.StartsWith("//"));
+			if (!(s.StartsWith("// ")))
+				continue;
+			s = s[3..];
+			if (s == "")
+				continue;
+			if (char.IsUpper(s, 0))
+				continue;
+			if (s.StartsWith("http"))
+				continue;
+			s = "// " + char.ToUpperInvariant(s[0]) + s[1..];
+			var b = a;
+			changes.Add((a, b));
+		}
+		foreach (var (a, b) in changes) {
+			root = root.ReplaceTrivia(a, b);
+		}
+		return root;
 	}
 
 	static void WriteText(string file, string text) {
