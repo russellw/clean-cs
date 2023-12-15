@@ -21,7 +21,11 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		if (c != 0)
 			return c;
 
-		return string.CompareOrdinal(Name(a), Name(b));
+		c = string.CompareOrdinal(Name(a), Name(b));
+		if (c != 0)
+			return c;
+
+		return string.CompareOrdinal(a.ToString(), b.ToString());
 	}
 
 	static Visibility GetVisibility(MemberDeclarationSyntax a) {
@@ -45,8 +49,8 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 	static string Name(MemberDeclarationSyntax a) {
 		// https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.syntax.memberdeclarationsyntax?view=roslyn-dotnet-4.7.0
 		switch (a) {
-		case ConstructorDeclarationSyntax constructor:
-			return constructor.Identifier.Text;
+		case ConstructorDeclarationSyntax:
+			return "";
 		case MethodDeclarationSyntax method:
 			return method.Identifier.Text;
 		case DelegateDeclarationSyntax delegateDeclaration:
