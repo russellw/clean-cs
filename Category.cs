@@ -1,0 +1,7 @@
+﻿// NO-SORT
+enum Category {
+	DELEGATE,
+	FIELD,
+	CONSTRUCTOR,
+	METHOD
+}

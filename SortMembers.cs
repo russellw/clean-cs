@@ -17,7 +17,7 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		if (c != 0)
 			return c;
 
-		c = Instance(a) - Instance(b);
+		c = GetCategory(a) - GetCategory(b);
 		if (c != 0)
 			return c;
 
@@ -39,11 +39,19 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		return Visibility.PRIVATE;
 	}
 
-	static int Instance(MemberDeclarationSyntax a) {
-		foreach (var modifier in a.Modifiers)
-			if (modifier.IsKind(SyntaxKind.StaticKeyword))
-				return 0;
-		return 1;
+	static Category GetCategory(MemberDeclarationSyntax a) {
+		switch (a) {
+		case ConstructorDeclarationSyntax:
+			return Category.CONSTRUCTOR;
+		case MethodDeclarationSyntax:
+			return Category.METHOD;
+		case DelegateDeclarationSyntax:
+			return Category.DELEGATE;
+		case EnumMemberDeclarationSyntax:
+		case BaseFieldDeclarationSyntax:
+			return Category.FIELD;
+		}
+		throw new Exception(a.ToString());
 	}
 
 	static string Name(MemberDeclarationSyntax a) {
