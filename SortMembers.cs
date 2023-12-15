@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 sealed class SortMembers: CSharpSyntaxRewriter {
 	public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) {
+		if (NoSort(node))
+			return base.VisitClassDeclaration(node);
 		var members = new List<MemberDeclarationSyntax>(node.Members);
 		var old = new List<MemberDeclarationSyntax>(members);
 		members.Sort(Compare);
@@ -21,6 +23,13 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 			node = node.WithMembers(new SyntaxList<MemberDeclarationSyntax>(members));
 		}
 		return base.VisitClassDeclaration(node);
+	}
+
+	static bool NoSort(ClassDeclarationSyntax node) {
+		foreach (var trivia in node.GetLeadingTrivia())
+			if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) && trivia.ToString().Contains("NO-SORT"))
+				return true;
+		return false;
 	}
 
 	static bool WantBlankLine(MemberDeclarationSyntax? prev, MemberDeclarationSyntax member) {
