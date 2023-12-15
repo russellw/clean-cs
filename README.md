@@ -9,7 +9,14 @@ Applies the following transformations:
 - Sort case sections in a switch statement
 - Sort comparison operands
   - `b == a` &rarr; `a == b`
-  - `a > b` -> `b < a`
+  - `a > b` &rarr; `b < a`
 - Sort class members
 
 In general, each user or project will only want a subset of these transformations. The simplest way to achieve this is to fork the project, edit the section of `Program.cs` marked `// Apply transformations`, and delete the unwanted ones.
+
+To suppress sorting the members of a particular class or enum, mark it with a comment like:
+
+```
+// NO-SORT
+class MyClass ...
+```
