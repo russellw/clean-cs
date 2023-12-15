@@ -88,6 +88,8 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 	}
 
 	static Category GetCategory(MemberDeclarationSyntax member) {
+		if (member.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ConstKeyword)))
+			return Category.CONST;
 		switch (member) {
 		case ConstructorDeclarationSyntax:
 			return Category.CONSTRUCTOR;
