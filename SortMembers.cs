@@ -13,7 +13,7 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 	}
 
 	static int Compare(MemberDeclarationSyntax a, MemberDeclarationSyntax b) {
-		var c = Visibility(a) - Visibility(b);
+		var c = GetVisibility(a) - GetVisibility(b);
 		if (c != 0)
 			return c;
 
@@ -24,15 +24,15 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		return string.CompareOrdinal(Name(a), Name(b));
 	}
 
-	static int Visibility(MemberDeclarationSyntax a) {
+	static Visibility GetVisibility(MemberDeclarationSyntax a) {
 		foreach (var modifier in a.Modifiers)
 			switch (modifier.Kind()) {
 			case SyntaxKind.PublicKeyword:
-				return 0;
+				return Visibility.PUBLIC;
 			case SyntaxKind.ProtectedKeyword:
-				return 1;
+				return Visibility.PROTECTED;
 			}
-		return 2;
+		return Visibility.PRIVATE;
 	}
 
 	static int Instance(MemberDeclarationSyntax a) {
