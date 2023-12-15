@@ -4,23 +4,23 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 sealed class SortMembers: CSharpSyntaxRewriter {
 	public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) {
-		if (NoSort(node))
-			return base.VisitClassDeclaration(node);
-		var members = new List<MemberDeclarationSyntax>(node.Members);
-		var old = new List<MemberDeclarationSyntax>(members);
-		members.Sort(Compare);
-		if (!members.SequenceEqual(old)) {
-			MemberDeclarationSyntax? prev = null;
-			for (var i = 0; i < members.Count; i++) {
-				var member = members[i];
-				member = WithoutTrivia(member);
-				if (WantBlankLine(prev, member))
-					member = PrependNewline(member);
-				member = AppendNewline(member);
-				members[i] = member;
-				prev = member;
+		if (!NoSort(node)) {
+			var members = new List<MemberDeclarationSyntax>(node.Members);
+			var old = new List<MemberDeclarationSyntax>(members);
+			members.Sort(Compare);
+			if (!members.SequenceEqual(old)) {
+				MemberDeclarationSyntax? prev = null;
+				for (var i = 0; i < members.Count; i++) {
+					var member = members[i];
+					member = WithoutTrivia(member);
+					if (WantBlankLine(prev, member))
+						member = PrependNewline(member);
+					member = AppendNewline(member);
+					members[i] = member;
+					prev = member;
+				}
+				node = node.WithMembers(new SyntaxList<MemberDeclarationSyntax>(members));
 			}
-			node = node.WithMembers(new SyntaxList<MemberDeclarationSyntax>(members));
 		}
 		return base.VisitClassDeclaration(node);
 	}
