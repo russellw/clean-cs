@@ -101,6 +101,7 @@ static class Program {
 		}
 		SyntaxNode root = tree.GetCompilationUnitRoot();
 
+		// apply transformations
 		root = new CapitalizeComments(root).Visit(root);
 		root = new SortCaseLabels().Visit(root);
 		root = new SortCaseSections().Visit(root);
