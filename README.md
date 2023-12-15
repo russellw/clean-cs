@@ -8,7 +8,7 @@ Applies the following transformations:
 - Sort case labels in a section
 - Sort case sections in a switch statement
 - Sort comparison operands
--- `b == a` -> `a == b`
+  - `b == a` -> `a == b`
 - Sort class members
 
 In general, each user or project will only want a subset of these transformations. The simplest way to achieve this is to fork the project, edit the section of `Program.cs` marked `// Apply transformations`, and delete the unwanted ones.
