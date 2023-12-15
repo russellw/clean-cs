@@ -6,6 +6,11 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 	public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) {
 		if (!NoSort(node)) {
 			var members = new List<MemberDeclarationSyntax>(node.Members);
+			// Check whether we changed anything important
+			// because this messes up the indentation
+			// and relies on clang-format to clean it up
+			// so if nothing important changed
+			// skip, and avoid unnecessary disk writes
 			var old = new List<MemberDeclarationSyntax>(members);
 			members.Sort(Compare);
 			if (!members.SequenceEqual(old)) {
