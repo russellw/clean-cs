@@ -4,12 +4,60 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 sealed class SortMembers: CSharpSyntaxRewriter {
 	public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node) {
-		var v = new List<MemberDeclarationSyntax>(node.Members);
-		var old = new List<MemberDeclarationSyntax>(v);
-		v.Sort(Compare);
-		if (!v.SequenceEqual(old))
-			node = node.WithMembers(new SyntaxList<MemberDeclarationSyntax>(v));
+		var members = new List<MemberDeclarationSyntax>(node.Members);
+		var old = new List<MemberDeclarationSyntax>(members);
+		members.Sort(Compare);
+		if (!members.SequenceEqual(old)) {
+			MemberDeclarationSyntax? prev = null;
+			for (var i = 0; i < members.Count; i++) {
+				var member = members[i];
+				member = WithoutTrivia(member);
+				if (WantBlankLine(prev, member))
+					member = PrependNewline(member);
+				member = AppendNewline(member);
+				members[i] = member;
+				prev = member;
+			}
+			node = node.WithMembers(new SyntaxList<MemberDeclarationSyntax>(members));
+		}
 		return base.VisitClassDeclaration(node);
+	}
+
+	static bool WantBlankLine(MemberDeclarationSyntax? prev, MemberDeclarationSyntax member) {
+		if (prev == null)
+			return false;
+		if (member is BaseMethodDeclarationSyntax)
+			return true;
+		return GetCategory(prev) != GetCategory(member);
+	}
+
+	static MemberDeclarationSyntax PrependNewline(MemberDeclarationSyntax member) {
+		var trivia = member.GetLeadingTrivia();
+		trivia = trivia.Insert(0, SyntaxFactory.SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\n"));
+		return member.WithLeadingTrivia(trivia);
+	}
+
+	static MemberDeclarationSyntax AppendNewline(MemberDeclarationSyntax member) {
+		var trivia = member.GetTrailingTrivia();
+		trivia = trivia.Add(SyntaxFactory.SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\n"));
+		return member.WithTrailingTrivia(trivia);
+	}
+
+	static MemberDeclarationSyntax WithoutTrivia(MemberDeclarationSyntax member) {
+		CheckOnlyWhitespace(member.GetLeadingTrivia());
+		CheckOnlyWhitespace(member.GetTrailingTrivia());
+		return member.WithoutLeadingTrivia().WithoutTrailingTrivia();
+	}
+
+	static void CheckOnlyWhitespace(SyntaxTriviaList trivias) {
+		foreach (var trivia in trivias)
+			switch (trivia.Kind()) {
+			case SyntaxKind.EndOfLineTrivia:
+			case SyntaxKind.WhitespaceTrivia:
+				break;
+			default:
+				throw new Exception(trivia.ToString());
+			}
 	}
 
 	static int Compare(MemberDeclarationSyntax a, MemberDeclarationSyntax b) {
@@ -28,8 +76,8 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		return string.CompareOrdinal(a.ToString(), b.ToString());
 	}
 
-	static Visibility GetVisibility(MemberDeclarationSyntax a) {
-		foreach (var modifier in a.Modifiers)
+	static Visibility GetVisibility(MemberDeclarationSyntax member) {
+		foreach (var modifier in member.Modifiers)
 			switch (modifier.Kind()) {
 			case SyntaxKind.PublicKeyword:
 				return Visibility.PUBLIC;
@@ -39,8 +87,8 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		return Visibility.PRIVATE;
 	}
 
-	static Category GetCategory(MemberDeclarationSyntax a) {
-		switch (a) {
+	static Category GetCategory(MemberDeclarationSyntax member) {
+		switch (member) {
 		case ConstructorDeclarationSyntax:
 			return Category.CONSTRUCTOR;
 		case MethodDeclarationSyntax:
@@ -51,12 +99,12 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		case BaseFieldDeclarationSyntax:
 			return Category.FIELD;
 		}
-		throw new Exception(a.ToString());
+		throw new Exception(member.ToString());
 	}
 
-	static string Name(MemberDeclarationSyntax a) {
+	static string Name(MemberDeclarationSyntax member) {
 		// https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.syntax.memberdeclarationsyntax?view=roslyn-dotnet-4.7.0
-		switch (a) {
+		switch (member) {
 		case ConstructorDeclarationSyntax:
 			return "";
 		case MethodDeclarationSyntax method:
@@ -68,6 +116,6 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 		case BaseFieldDeclarationSyntax baseField:
 			return baseField.Declaration.Variables.First().Identifier.Text;
 		}
-		throw new Exception(a.ToString());
+		throw new Exception(member.ToString());
 	}
 }
