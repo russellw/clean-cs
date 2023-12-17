@@ -97,7 +97,7 @@ static class Program {
 		if (tree.GetDiagnostics().Any()) {
 			foreach (var diagnostic in tree.GetDiagnostics())
 				Console.Error.WriteLine(diagnostic);
-			return;
+			Environment.Exit(1);
 		}
 		SyntaxNode root = tree.GetCompilationUnitRoot();
 
