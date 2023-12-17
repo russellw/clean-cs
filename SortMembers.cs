@@ -102,8 +102,6 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 	}
 
 	static Category GetCategory(MemberDeclarationSyntax member) {
-		if (member.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ConstKeyword)))
-			return Category.CONST;
 		switch (member) {
 		case ConstructorDeclarationSyntax:
 			return Category.CONSTRUCTOR;
@@ -113,6 +111,13 @@ sealed class SortMembers: CSharpSyntaxRewriter {
 			return Category.DELEGATE;
 		case EnumMemberDeclarationSyntax:
 		case BaseFieldDeclarationSyntax:
+			foreach (var modifier in member.Modifiers)
+				switch (modifier.Kind()) {
+				case SyntaxKind.ConstKeyword:
+					return Category.CONST;
+				case SyntaxKind.StaticKeyword:
+					return Category.STATIC_FIELD;
+				}
 			return Category.FIELD;
 		}
 		throw new Exception(member.ToString());
