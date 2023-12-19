@@ -110,6 +110,8 @@ static class Program {
 
 		tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)root);
 		text = tree.ToString();
+		if (!text.EndsWith('\n'))
+			text += '\n';
 		if (inplace) {
 			if (old == text)
 				return;
