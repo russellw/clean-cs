@@ -5,6 +5,7 @@ Assumes e.g. `clang-format` run before and after, so it doesn't need to worry ab
 Applies the following transformations:
 
 - Capitalize the first word of the first line comment in a block thereof.
+- Remove redundant braces.
 - Sort case labels in a section.
 - Sort case sections in a switch statement.
 - Sort comparison operands:

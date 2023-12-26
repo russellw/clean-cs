@@ -103,6 +103,7 @@ static class Program {
 
 		// apply transformations
 		root = new CapitalizeComments(root).Visit(root);
+		root = new RemoveRedundantBraces().Visit(root);
 		root = new SortCaseLabels().Visit(root);
 		root = new SortCaseSections().Visit(root);
 		root = new SortComparison().Visit(root);
