@@ -1,10 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
 
 sealed class CapitalizeComments: CSharpSyntaxRewriter {
-	readonly HashSet<int> commentLines = new();
-
 	public CapitalizeComments(SyntaxNode root): base(true) {
 		foreach (var trivia in root.DescendantTrivia().OfType<SyntaxTrivia>()) {
 			if (!trivia.IsKind(SyntaxKind.SingleLineCommentTrivia))
@@ -24,7 +22,7 @@ sealed class CapitalizeComments: CSharpSyntaxRewriter {
 			if (!s.StartsWith("// "))
 				break;
 			s = s[3..];
-			if (s == "")
+			if ("" == s)
 				break;
 			if (char.IsUpper(s, 0))
 				break;
@@ -35,6 +33,8 @@ sealed class CapitalizeComments: CSharpSyntaxRewriter {
 		} while (false);
 		return base.VisitTrivia(trivia);
 	}
+
+	readonly HashSet<int> commentLines = new();
 
 	static int Line(SyntaxTrivia trivia) {
 		return trivia.GetLocation().GetLineSpan().StartLinePosition.Line;

@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -9,7 +9,7 @@ sealed class SortComparison: CSharpSyntaxRewriter {
 		switch (node.Kind()) {
 		case SyntaxKind.EqualsExpression:
 		case SyntaxKind.NotEqualsExpression:
-			if (string.CompareOrdinal(a.ToString(), b.ToString()) > 0)
+			if (0 < string.CompareOrdinal(a.ToString(), b.ToString()))
 				node = node.WithLeft(b).WithRight(a);
 			break;
 		case SyntaxKind.GreaterThanExpression:
